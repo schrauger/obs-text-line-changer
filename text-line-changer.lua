@@ -1,7 +1,5 @@
 obs           = obslua
 
--- used lyrics.lua for a bunch of logic. Still needs a ton of work to actually make usable
-
 -- variables set by user (via pref_ variables)
 obs_text_object		= "" 	-- OBS text object that we are manipulating
 announcements_file 	= "" 	-- Text file on the local system
@@ -11,9 +9,9 @@ loop_timer_seconds 	= 10	-- How long each announcement is shown before going to 
 -- variables used by script, generated or computed and not user-configured
 current_announcement_index = 1	-- Global script variable to keep track of which announcement we are currently showing - 0 indexed
 array_announcements 	= {}	-- Internal array of announcement strings
-activated     		= false	-- @TODO figure out if we need this
+activated     		= false	-- only use cpu when the visible scene contains our text object
 
--- Function to show the announcement @TODO actually show the announcement
+-- Function to show the announcement
 function set_announcement_text()
 	local text = array_announcements[current_announcement_index]
 	local source = obs.obs_get_source_by_name(obs_text_object)
