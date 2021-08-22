@@ -42,21 +42,37 @@ function load_announcements(file)
 		return
 	end
 	array_announcements = {}
-	local line_counter = 1 -- 1 indexed, for easier modulo math (since the divisor is 1 indexed - can't show 0 lines)
+	local line_counter = 0
 	local announcement_string = ""
+	local announcement_contains_data = false
 	for line in io.lines(file) do
+		if ((line_counter % visible_lines) == 0) then
+			-- first line of the announcement
+			announcement_string = line
+		else
+			-- not first line
+			announcement_string = announcement_string .. "\n" .. line
+		end
 		if (line ~= '') then
-			announcement_string = announcement_string .. line .. "\n" -- add a newline character after each line; shouldn't matter even if it's a 1-line string (or the last line in the line count), since a newline at the end will be ignored
+			-- keep track of the announcement. if it ends up all being blank lines, exclude it altogether.
+			-- (can't just check the string after concating it, since it will have newline characters)
+			announcement_contains_data = true
 		end
 
 		-- check if we've read enough lines for one announcement
 		if (((line_counter + 1) % visible_lines) == 0) then
 			-- next line to be read will be the start of a new announcement. Add the current string to our array and clear the string.
-			if announcement_string ~= '' then
+			if (announcement_contains_data) then
 				array_announcements[#array_announcements + 1] = announcement_string
 			end
 			announcement_string = ""
+			announcement_contains_data = false
 		end
+		line_counter = line_counter + 1
+	end
+	if (announcement_contains_data) then
+		-- if we reached the end, but there's still text in the string, it means the last annoucement wasn't long enough (lines_per_announcement > 1). add it anyway instead of discarding it.
+		array_announcements[#array_announcements + 1] = announcement_string
 	end
 end
 
@@ -209,4 +225,3 @@ function script_load(settings)
 	obs.signal_handler_connect(sh, "source_deactivate", source_deactivated)
 
 end
-
