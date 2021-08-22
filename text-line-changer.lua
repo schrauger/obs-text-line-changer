@@ -45,14 +45,16 @@ function load_announcements(file)
 	local line_counter = 1 -- 1 indexed, for easier modulo math (since the divisor is 1 indexed - can't show 0 lines)
 	local announcement_string = ""
 	for line in io.lines(file) do
-
-		announcement_string = announcement_string .. line .. "\n" -- add a newline character after each line; shouldn't matter even if it's a 1-line string (or the last line in the line count), since a newline at the end will be ignored
+		if (line ~= '') then
+			announcement_string = announcement_string .. line .. "\n" -- add a newline character after each line; shouldn't matter even if it's a 1-line string (or the last line in the line count), since a newline at the end will be ignored
+		end
 
 		-- check if we've read enough lines for one announcement
 		if (((line_counter + 1) % visible_lines) == 0) then
 			-- next line to be read will be the start of a new announcement. Add the current string to our array and clear the string.
-			
-			array_announcements[#array_announcements + 1] = announcement_string
+			if announcement_string ~= '' then
+				array_announcements[#array_announcements + 1] = announcement_string
+			end
 			announcement_string = ""
 		end
 	end
@@ -68,8 +70,11 @@ function next_announcement()
 	set_announcement_text()
 end
 
-
+-- This function runs every few seconds (depends on user preference).
+-- It also reloads the announcement file, so that if it gets updated, it will constantly have the new values.
+-- Otherwise, the user would have to click a reset button or change a preference to refresh the cached values.
 function announcement_timer_callback()
+	load_announcements(announcements_file)
 	next_announcement()
 end
 
